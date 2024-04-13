@@ -145,4 +145,130 @@ func TestUpdateCandidates(t *testing.T) {
 	} else if len(repos) != 2 {
 		t.Errorf("Expected 2 repositories needing updates, got %d", len(repos))
 	}
+}
+
+func TestFindLongestDependencyChains(t *testing.T) {
+	g := graph.NewGraph()
+
+	// Create a chain: repo1 -> mod1 -> mod2 -> mod3
+	nodes := []struct {
+		id    string
+		label string
+		typ   string
+	}{
+		{"repo1", "test-repo-1", "repository"},
+		{"mod1", "github.com/test/mod1", "module"},
+		{"mod2", "github.com/test/mod2", "module"},
+		{"mod3", "github.com/test/mod3", "module"},
+	}
+
+	for _, n := range nodes {
+		g.AddNode(&graph.Node{
+			ID:    n.id,
+			Label: n.label,
+			Type:  n.typ,
+		})
+	}
+
+	// Add dependencies
+	edges := []struct {
+		source  string
+		target  string
+		version string
+	}{
+		{"repo1", "mod1", "v1.0.0"},
+		{"mod1", "mod2", "v1.0.0"},
+		{"mod2", "mod3", "v1.0.0"},
+	}
+
+	for _, e := range edges {
+		g.AddEdge(&graph.Edge{
+			Source:  e.source,
+			Target:  e.target,
+			Version: e.version,
+		})
+	}
+
+	analyzer := NewAnalyzer(g)
+	chains := analyzer.FindLongestDependencyChains(1)
+
+	if len(chains) != 1 {
+		t.Fatalf("Expected 1 chain, got %d", len(chains))
+	}
+
+	if chains[0].Length != 4 {
+		t.Errorf("Expected chain length 4, got %d", chains[0].Length)
+	}
+
+	if !contains(chains[0].Path, "repo1") || !contains(chains[0].Path, "mod3") {
+		t.Error("Chain does not contain expected start and end nodes")
+	}
+}
+
+func TestAnalyzeModuleImpact(t *testing.T) {
+	g := setupTestGraph()
+	analyzer := NewAnalyzer(g)
+
+	impact, err := analyzer.AnalyzeModuleImpact("mod1")
+	if err != nil {
+		t.Fatalf("AnalyzeModuleImpact failed: %v", err)
+	}
+
+	if len(impact.AffectedRepos) != 2 {
+		t.Errorf("Expected 2 affected repos, got %d", len(impact.AffectedRepos))
+	}
+
+	if impact.ImpactScore <= 0 {
+		t.Error("Expected positive impact score")
+	}
+}
+
+func TestSimulateSecurityScan(t *testing.T) {
+	g := graph.NewGraph()
+
+	// Add test nodes with different versions
+	nodes := []struct {
+		id      string
+		label   string
+		version string
+	}{
+		{"mod1", "github.com/test/mod1", "v0.1.0"},
+		{"mod2", "github.com/test/mod2", "v1.0.0-beta"},
+		{"mod3", "github.com/test/mod3", "v1.0.0"},
+	}
+
+	for _, n := range nodes {
+		g.AddNode(&graph.Node{
+			ID:      n.id,
+			Label:   n.label,
+			Type:    "module",
+			Version: n.version,
+		})
+	}
+
+	analyzer := NewAnalyzer(g)
+	results := analyzer.SimulateSecurityScan()
+
+	if len(results) != 2 { // Should detect v0.1.0 and v1.0.0-beta
+		t.Errorf("Expected 2 security scan results, got %d", len(results))
+	}
+
+	// Check risk levels
+	for _, result := range results {
+		if result.Version == "v0.1.0" && result.RiskLevel != "HIGH" {
+			t.Errorf("Expected HIGH risk for v0.1.0, got %s", result.RiskLevel)
+		}
+		if result.Version == "v1.0.0-beta" && result.RiskLevel != "MEDIUM" {
+			t.Errorf("Expected MEDIUM risk for v1.0.0-beta, got %s", result.RiskLevel)
+		}
+	}
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 } 
