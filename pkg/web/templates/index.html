@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{.Title}}</h1>
+            <div class="controls">
+                <select id="layout">
+                    <option value="force">Force Layout</option>
+                    <option value="tree">Tree Layout</option>
+                    <option value="radial">Radial Layout</option>
+                </select>
+                <button id="toggleStats">Show Stats</button>
+                <button id="toggleSecurity">Security Scan</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="graph"></div>
+            <div id="sidebar" class="hidden">
+                <div id="stats" class="panel">
+                    <h2>Dependency Statistics</h2>
+                    {{with .Stats}}
+                    <ul>
+                        <li>Total Repositories: {{.TotalRepositories}}</li>
+                        <li>Total Modules: {{.TotalModules}}</li>
+                        <li>Shared Modules: {{.SharedModules}}</li>
+                        <li>Version Conflicts: {{.VersionConflicts}}</li>
+                        <li>Average Dependencies: {{printf "%.2f" .AverageDependencies}}</li>
+                    </ul>
+                    <h3>Top Shared Modules:</h3>
+                    <ul>
+                        {{range .TopShared}}
+                        <li>{{.}}</li>
+                        {{end}}
+                    </ul>
+                    {{end}}
+                </div>
+
+                <div id="details" class="panel hidden">
+                    <h2>Node Details</h2>
+                    <div id="nodeInfo"></div>
+                </div>
+
+                <div id="security" class="panel hidden">
+                    <h2>Security Scan Results</h2>
+                    <div id="scanResults"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/graph.js"></script>
+    <script src="/static/js/ui.js"></script>
+</body>
+</html> 
