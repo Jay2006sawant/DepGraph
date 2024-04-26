@@ -1,0 +1,139 @@
+# DepGraph Configuration Example
+# Copy this file to .depgraph.yaml and modify as needed
+
+# GitHub configuration
+github:
+  # GitHub API token (can also be set via GITHUB_TOKEN environment variable)
+  token: ${GITHUB_TOKEN}
+  
+  # List of organizations to scan
+  organizations:
+    - your-org
+    - another-org
+  
+  # List of specific repositories to include
+  repositories:
+    - owner/repo1
+    - owner/repo2
+  
+  # Repositories to exclude from scanning
+  exclude:
+    - archived-repo
+    - test-repo
+    - temp-*  # Supports glob patterns
+  
+  # API rate limiting settings
+  rate_limit:
+    requests_per_hour: 5000
+    concurrent_requests: 10
+
+# Analysis configuration
+analysis:
+  # Maximum depth for dependency chain analysis
+  scan_depth: 3
+  
+  # Include development dependencies
+  include_dev_deps: false
+  
+  # Version checking options
+  version_check:
+    enabled: true
+    notify_outdated: true
+    min_age_days: 30
+  
+  # Security scanning options
+  security_scan:
+    enabled: true
+    risk_levels:
+      - HIGH
+      - MEDIUM
+    notify_vulnerabilities: true
+
+# Database configuration
+database:
+  # Database type (sqlite or postgres)
+  type: sqlite
+  
+  # Connection string (for postgres)
+  # connection: "postgres://user:password@localhost:5432/depgraph?sslmode=disable"
+  
+  # SQLite file path
+  file: "depgraph.db"
+  
+  # Database options
+  options:
+    max_connections: 10
+    timeout: 30s
+
+# Web interface configuration
+web:
+  # Server settings
+  host: "localhost"
+  port: 8080
+  
+  # Enable HTTPS
+  tls:
+    enabled: false
+    cert_file: "cert.pem"
+    key_file: "key.pem"
+  
+  # Authentication (optional)
+  auth:
+    enabled: false
+    type: "basic"
+    users:
+      - username: "admin"
+        password: "changeme"
+
+# Visualization settings
+visualization:
+  # Default graph layout
+  default_layout: "force"
+  
+  # UI theme
+  theme: "light"
+  
+  # Graph appearance
+  graph:
+    node_size: 8
+    edge_width: 1.5
+    show_labels: true
+    label_size: 12
+  
+  # Color scheme
+  colors:
+    repository: "#3498db"
+    module: "#2ecc71"
+    conflict: "#e74c3c"
+    background: "#ffffff"
+
+# Notification settings
+notifications:
+  # Email notifications
+  email:
+    enabled: false
+    smtp:
+      host: "smtp.example.com"
+      port: 587
+      username: "user@example.com"
+      password: "password"
+    recipients:
+      - "team@example.com"
+  
+  # Slack notifications
+  slack:
+    enabled: false
+    webhook_url: "https://hooks.slack.com/services/..."
+    channel: "#dependencies"
+
+# Logging configuration
+logging:
+  level: "info"
+  format: "json"
+  output: "depgraph.log"
+  
+  # Enable debug logging for specific components
+  debug:
+    - github
+    - scanner
+    - analyzer 
