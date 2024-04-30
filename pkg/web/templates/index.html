@@ -3,61 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
+    <title>DepGraph - Dependency Visualization</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Add Three.js for WebGL rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>{{.Title}}</h1>
+            <h1>DepGraph</h1>
             <div class="controls">
-                <select id="layout">
+                <select id="layoutSelect">
                     <option value="force">Force Layout</option>
                     <option value="tree">Tree Layout</option>
                     <option value="radial">Radial Layout</option>
                 </select>
-                <button id="toggleStats">Show Stats</button>
-                <button id="toggleSecurity">Security Scan</button>
+                <button id="zoomFit">Fit to View</button>
+                <button id="exportSVG">Export SVG</button>
             </div>
         </header>
-
         <main>
             <div id="graph"></div>
-            <div id="sidebar" class="hidden">
-                <div id="stats" class="panel">
-                    <h2>Dependency Statistics</h2>
-                    {{with .Stats}}
-                    <ul>
-                        <li>Total Repositories: {{.TotalRepositories}}</li>
-                        <li>Total Modules: {{.TotalModules}}</li>
-                        <li>Shared Modules: {{.SharedModules}}</li>
-                        <li>Version Conflicts: {{.VersionConflicts}}</li>
-                        <li>Average Dependencies: {{printf "%.2f" .AverageDependencies}}</li>
-                    </ul>
-                    <h3>Top Shared Modules:</h3>
-                    <ul>
-                        {{range .TopShared}}
-                        <li>{{.}}</li>
-                        {{end}}
-                    </ul>
-                    {{end}}
-                </div>
-
-                <div id="details" class="panel hidden">
-                    <h2>Node Details</h2>
-                    <div id="nodeInfo"></div>
-                </div>
-
-                <div id="security" class="panel hidden">
-                    <h2>Security Scan Results</h2>
-                    <div id="scanResults"></div>
+            <div id="details" class="panel">
+                <h2>Details</h2>
+                <div id="nodeDetails">
+                    <p>Select a node to view details</p>
                 </div>
             </div>
         </main>
+        <footer>
+            <p>DepGraph - Dependency Analysis Tool</p>
+        </footer>
     </div>
-
     <script src="/static/js/graph.js"></script>
-    <script src="/static/js/ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const graph = new DependencyGraph('#graph');
+            graph.loadData();
+
+            document.getElementById('layoutSelect').addEventListener('change', (e) => {
+                graph.setLayout(e.target.value);
+            });
+
+            document.getElementById('zoomFit').addEventListener('click', () => {
+                // Implement zoom to fit functionality
+            });
+
+            document.getElementById('exportSVG').addEventListener('click', () => {
+                // Implement SVG export functionality
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                graph.resize();
+            });
+        });
+    </script>
 </body>
 </html> 
